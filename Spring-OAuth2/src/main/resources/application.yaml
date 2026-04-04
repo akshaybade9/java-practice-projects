@@ -6,8 +6,8 @@ spring:
       client:
         registration:
           google:
-            client-id: 586170796290-t326c2e4hpft8gsldnnqaghm7tt3d95m.apps.googleusercontent.com
-            client-secret: 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
+            client-id: CLIENT_ID
+            client-secret: CLIENT_SECRET
             authorization-grant-type: authorization_code
             scope:
               - profile
