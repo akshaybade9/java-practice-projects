@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: Spring-OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 586170796290-t326c2e4hpft8gsldnnqaghm7tt3d95m.apps.googleusercontent.com
+            client-secret: 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
+            authorization-grant-type: authorization_code
+            scope:
+              - profile
+              - email
+#        provider:
+#          google:
+#           # Authorization API
+#            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+#            # Token API
+#            token-uri: https://oauth2.googleapis.com/token
+#            # User Profile API
+#            user-info-uri: https://oauth2.googleapis.com/oauth2/v3/userinfo
