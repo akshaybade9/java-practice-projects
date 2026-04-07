@@ -1,0 +1,252 @@
+########################################################################################################################################################################
+
+Java 8 Feutures:
+
+- Default & Static methods in interface
+-Lamba Expressions
+-Functional interface
+-Method References
+-Optional class
+-Date-Time API
+-Streams API
+-Metaspace 
+
+
+########################################################################################################################################################################
+
+Default Method :
+ the method define using default key word in an interface that has as implementation
+
+ EX:
+
+public interface MyInterface{
+ 
+    default void m1(){
+       //implementation
+    }
+
+ }
+
+ -default method can be ovverridden
+
+Why introduce
+- For backward compatibility - If new method add in interface then all classes which implement that they should be ovverride, so for this cause default method comes. Due to default we only ovverride whenever required only.
+
+Diamond Problem:
+If two interface have same method name, same parameter and one class implement both interface, then we need to compulsory ovverride, and need to specify which method need to be call EX. Calculator.super.calculator(a, b)
+
+--------------------***-------------------------
+public interface Calculator {
+	default int calculator(int a, int b) {
+		return a+b;
+	}
+}
+--------------------***-------------------------
+public interface Calculator1 {
+	default int calculator(int a, int b) {
+		return a*b;
+	}
+}
+--------------------***-------------------------
+public class CalculatorImpl implements Calculator,Calculator1{
+	@Override
+	public int calculator(int a, int b) {
+		// TODO Auto-generated method stub
+		return Calculator.super.calculator(a, b);
+	}
+}
+--------------------***-------------------------
+
+Case 2: If one class implement one interface and extends one class and both have method with same name then if we call method then precedence goes to class method , and we dont need to ovverride , not compulsory
+
+--------------------***-------------------------
+public interface Calculator {
+	default int calculator(int a, int b) {
+		return a+b;
+	}
+}
+--------------------***-------------------------
+public class Calculator1 {	
+	public int calculator(int a, int b) {
+		return a*b;
+	}
+}
+--------------------***-------------------------
+public class CalculatorImpl extends Calculator1 implements Calculator{
+}
+--------------------***-------------------------
+@SpringBootApplication
+public class Java8PracticeApplication {
+	public static void main(String[] args) {
+		SpringApplication.run(Java8PracticeApplication.class, args);	
+		CalculatorImpl impl = new CalculatorImpl();
+		int calculator = impl.calculator(2, 8);
+		System.out.println(calculator);	   // output will be 16
+	}
+}
+--------------------***-------------------------
+Case 3:
+
+
+public interface Calculator {
+
+   //cannot right method from Object class in an interface gives compile time error
+	default boolean equals(Object anObject) {
+        if (this == anObject) {
+            return true;
+        }
+    }
+}
+
+########################################################################################################################################################################
+
+Static methods in interface in java 8:
+
+-main purpose is that only interface have implementation , this not change by any class by ovverride it.
+
+-If we declare static method then we should need to give implementation , not able to create abstract static method
+-we can able to call one static method from another static method 
+
+Points from vidio:
+-static methods belongs to interface, not to the child class
+-static methods cannot be ovverridden
+-An interface can have multiple static methods
+-static methods must have a body
+-static method can call another static method but not a default method
+-it can be invoked by interface's name
+
+--------------------***-------------------------
+public interface Payment{
+
+   default int calculator(int a, int b) {
+		if (isValidAmount(a, a)) {
+			return a + b;
+		} else {
+			return 0;
+		}
+	}
+
+   static boolean isValidAmount(int amount, int amount2) {
+		logInTime();
+		if (amount > 0 && amount2 > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	static String logInTime() {
+		return "LogInTime";
+	}
+
+}
+
+@SpringBootApplication
+public class Java8PracticeApplication {
+
+System.out.println(Payment.isValidAmount(1, 2)); // we can also call static method from another class by calling from interfaceName.methodName();
+
+}
+
+########################################################################################################################################################################
+
+Functional interface:
+Contains exactly one abstract method making it suitable for use with Lamba Expressions & method References
+Rule:
+-It has only one abstract method
+-It can have multiple default methods
+-It can have multiple static methods
+-It should have @FunctionalIntereface annotation on it. (Optional but recommended)
+
+
+
+Lamba Expressions:
+Concise way to represent an implementation of Functional interface using a short readable syntax -      () -> {//implementation here}
+-Design to reduce boiler plate code
+-It replace annonymous inner class
+
+Rule:
+-If there is only one line then not need to add {}; EX - MyInterface m3=()->System.out.println("Shorter Lambda Use");
+-If there is only one line and method have return type then not need to add return word also EX - Addition var2 = (a, b) -> a + b;
+-if abstract method have only one single parameter then shortcut use EX - Square var2 = s -> s * s; || Square var2 = (s) -> s * s;
+
+--------------------***-------------------------
+
+@FunctionalInterface
+public interface MyInterface {
+	void start();
+}
+
+
+// 1st way
+		MyInterface m = new MyInterface() {
+			@Override
+			public void start() {
+				System.out.println("Anonymous Class");
+
+			}
+		};
+
+		m.start();
+		
+		
+//2nd Way
+MyInterface m2 = ()->{
+			System.out.println("Lambda Expression");
+		};
+		
+	m2.start();
+		
+		
+//3rd way
+MyInterface m3=()->System.out.println("Shorter Lambda Use");
+		m3.start();
+
+--------------------***-------------------------
+
+@FunctionalInterface
+public interface Addition {
+	int sum(int a, int b);
+}
+
+
+// 1st way
+		Addition var = (a, b) -> {
+			return a + b;
+		};
+		System.out.println(var.sum(2, 5));
+
+		
+		// 2nd way
+		Addition var2 = (a, b) -> a + b;
+		System.out.println(var.sum(2, 5));
+
+--------------------***-------------------------
+
+@FunctionalInterface
+public interface Square {
+		int square(int a);
+}
+
+/// 1st way
+		Square var3 = (s) -> {
+			return s * s;
+		};
+		System.out.println(var3.square(5));
+
+		// 2nd way
+		Square var = (s) -> s * s;
+		System.out.println(var.square(5));
+
+		// 3rd way
+		Square var2 = s -> s * s;
+		System.out.println(var2.square(5));
+
+--------------------***-------------------------
+
+########################################################################################################################################################################
+
+Functional interfaces:
+- Predicate
+- Consumer
+- Function
+- Supplier
