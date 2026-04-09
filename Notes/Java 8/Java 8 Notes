@@ -351,3 +351,145 @@ public interface Supplier<T> {
 
 Method References vs Lambda in java 8
 
+It is a shorter way to implement a Functional interface.
+
+ Rule:
+ 1.implementation should only have a single statement (line)
+ 2.In that statement method calling present
+ 3.Method we are calling in implementation should match its parameter and return type exactly to method from FunctionalInterface
+ 4.Method we are calling in implementation should match its only return type to method from FunctionalInterface in case of  3. Instance method ref(of arbitrary object)
+
+ Types:
+ 1. Static method reference     
+--  ClassName::staticMethodName.    MethodRefInterface m2 = MatchOperations::add; --add method is static
+
+ 2. Instance method reference (of particular object)
+ --  objectName::instanceMethodName. MathOperations operations = new MathOperations(); ValidateInterface v = operations::validateMethod; validateMethod is non static
+ 
+ 3. Instance method reference (of arbitrary object)
+ --  ClassName::instanceMethodName.  Call method from parameter reference and that ref have return type as any Class EX - (String str); String::length;
+ --  it becomes (str) -> str.length() that's why rather length method not match paramter then also it internally take String as parameter
+ 
+ 4. Constructor method reference.
+ --  ClassName::new
+ --  Creator<User> u = User::new;  Creator<T> { T create(String name) }; 
+ public class User {	
+	private String userName;
+	public User(String userName) {
+		super();
+		this.userName = userName;
+	}
+}
+--------------------***-------------------------
+
+ @FunctionalInterface
+public interface MethodRefInterface {
+	int calculate(int a, int b);
+}
+
+// by lambda but not able to do by method reference
+		MethodRefInterface m = (a, b) -> {
+			return a * b;
+		};
+
+		System.out.println(m.calculate(3, 4));
+
+--------------------***-------------------------
+ 1. Static method reference  
+
+	// by method reference need method calling so static method call from another class by class reference
+	MethodRefInterface m2 = MatchOperations::add;
+		System.out.println(m2.calculate(4, 5)); 
+
+	
+	public class MatchOperations {
+	public static int add(int a, int b) {
+		return a + b;
+	}
+}
+
+--------------------***-------------------------
+
+ 2. Instance method reference(of particular object)
+
+
+@FunctionalInterface
+public interface ValidateInterface {	
+	boolean validate(int num);
+}
+
+MathOperations operations = new MathOperations();
+ValidateInterface v = operations::validateMethod;
+		System.out.println(v.validate(17));
+		System.out.println(v.validate(-9));
+
+public class MathOperations {
+	public  boolean validateMethod(int num) {
+		return num>0;
+	}
+}
+
+--------------------***-------------------------
+
+ 3. Instance method reference(of arbitrary object)
+
+ @FunctionalInterface
+public interface StringOprations {
+	int operate(String str);
+}
+
+StringOprations s2 = (str)->{
+			return str.length();
+		};
+		
+StringOprations s = String::length;
+System.out.println(s.operate("Akshay"));
+
+Ex -2
+
+@FunctionalInterface
+interface AgeOp {
+    int get(Person p);
+}
+
+class Person {
+    int age;
+
+    Person(int age) {
+        this.age = age;
+    }
+
+    public int getAge() {
+        return age;
+    }
+}
+
+AgeOp op = Person::getAge;
+
+System.out.println(op.get(new Person(25)));
+
+--------------------***-------------------------
+
+ 4. Constructor method reference.
+
+ @FunctionalInterface
+public interface Creator<T> {
+	T create(String name); 
+}
+
+public class User {	
+	private String userName;
+	public User(String userName) {
+		super();
+		this.userName = userName;
+	}
+}
+
+// by using lambda
+Creator<User> user = (name)->{
+			return new User(name);
+		};
+
+// using method reference
+Creator<User> u = User::new;
+
