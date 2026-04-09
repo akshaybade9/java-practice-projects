@@ -245,8 +245,109 @@ public interface Square {
 
 ########################################################################################################################################################################
 
+ --------------------***-------------------------
+
 Functional interfaces:
-- Predicate
-- Consumer
-- Function
-- Supplier
+1. Predicate
+@FunctionalInterface
+public interface Predicate<T> {
+boolean test(T t);
+}
+
+2. Consumer
+@FunctionalInterface
+public interface Consumer<T> {
+	 void accept(T t);
+}
+
+3. Function
+@FunctionalInterface
+public interface Function<T, R> {
+ R apply(T t);
+}
+
+4. Supplier
+@FunctionalInterface
+public interface Supplier<T> {
+    T get();
+}
+
+ --------------------***-------------------------
+
+Predicate:
+It is a pre define Functional interface in java 8 that takes one argument and returns a boolean value.
+
+-It is mainly used for condition testing.
+
+ --------------------***-------------------------
+
+@FunctionalInterface
+public interface Predicate<T> {
+boolean test(T t);
+}
+
+
+ //1st way
+//		Predicate<Integer> p = (num)->{
+//			if(num%2==0) {
+//				return true; 
+//			}else {
+//				return false;
+//			}
+//		};
+		
+		
+		Predicate<Integer> p = num->num%2==0;
+		System.out.println(p.test(10));
+
+--------------------***-------------------------
+
+Function :
+It is a pre define Functional interface in java 8
+
+
+--------------------***-------------------------
+
+@FunctionalInterface
+public interface Function<T, R> {
+ R apply(T t);
+}
+
+//1st way
+		Function<String, Integer> f = (str)->{
+			return str.length();
+		};
+		System.out.println(f.apply("Akshay"));
+		
+		
+		//2nd way
+		Function<String, Integer> f =str-> str.length();
+		System.out.println(f.apply("Akshay"));
+		
+--------------------***-------------------------
+
+Consumer:
+Consumer is pre define FunctionalIntereface in java 8 that takes one input and returns nothing
+It is mainly ised to perform any operation where u dont to return anything
+
+@FunctionalInterface
+public interface Consumer<T> {
+	 void accept(T t);
+}
+
+--------------------***-------------------------
+
+Supplier:
+Supplier is pre define FunctionalIntereface in java 8 that does not take any input but returns a value
+
+@FunctionalInterface
+public interface Supplier<T> {
+    T get();
+}
+
+--------------------***-------------------------
+
+########################################################################################################################################################################
+
+Method References vs Lambda in java 8
+
