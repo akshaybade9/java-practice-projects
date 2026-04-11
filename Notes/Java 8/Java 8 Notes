@@ -493,3 +493,195 @@ Creator<User> user = (name)->{
 // using method reference
 Creator<User> u = User::new;
 
+########################################################################################################################################################################
+
+Optional Class:
+It introduce in java8 where main funtion is to handle null checks 
+-May or may not contain value
+
+
+Methods cover:
+1.isPresent - optionalUser.isPresent() ----retrun true or false - true if value present
+2.OPtional.of(T);   Optional.of(user); ----return OPtional<T> - not handle null checks
+3.OPtional.ofNullable(T);   Optional.of(user); ----return OPtional<T> - handle null checks--if null it return empty optional
+4.get();  --optionalUser.get();   it return T ---User user = optionalUser.get();  if optionalUser is null then it throw exception
+5.empty();  --Optional.empty(); ---returns empty Optional Object
+6.ifPresent - optionalUser.ifPresent(user->System.out.println("")); - it execute only when value present, it takes argument as Consumer
+7.orElse(T); - User user = optionalUser2.orElse(new User(-1, "Default")); System.out.println(""); 
+8.orElseGet(Consumer T);  User user = optionalUser.orElseGet(()->new User(-1, "Default"));
+9.orElseThrow(); User user = optionalUser.orElseThrow(); ---throw exception when value is null
+10.OPtional.ofNullable(T);   Optional.ofNullable(user); ----return OPtional<T> -  handle null checks
+
+
+
+
+Before code:
+
+--------------------***-------------------------
+
+public class UserService {
+
+	public User getUserById(int id) {
+
+		List<User> users = Arrays.asList(new User(1, "Akshay"), new User(2, "Priti"));
+
+		for (User user : users) {
+			if (id == user.getUserId()) {
+				return user;
+			}
+		}
+
+		return null;
+	}
+
+}
+
+public static void main(String[] args) {
+
+		UserService service = new UserService();
+
+		User user = service.getUserById(1);
+
+		if (user != null) {
+			System.out.println("UserId:" +" "+ user.getUserId() + " Username: " + user.getUsername());
+		}
+
+--------------------***-------------------------
+
+After code:  isPresent
+
+public class UserService {
+
+	public Optional<User> getUserById(int id) {
+
+		List<User> users = Arrays.asList(new User(1, "Akshay"), new User(2, "Priti"));
+
+		for (User user : users) {
+			if (id == user.getUserId()) {
+				return Optional.of(user);
+			}
+		}
+
+		return Optional.empty();
+	}
+
+}
+
+UserService service = new UserService();
+
+		Optional<User> optionalUser = service.getUserById(1);
+
+		if (optionalUser.isPresent()) {
+			User user = optionalUser.get();
+			System.out.println("UserId:" +" "+ user.getUserId() + " Username: " + user.getUsername());
+		}
+
+--------------------***-------------------------
+ifPresent:
+optionalUser.ifPresent(user->System.out.println("UserId:" +" "+ user.getUserId() + " Username: " + user.getUsername()));
+--------------------***-------------------------
+orElse(T);
+User user = optionalUser2.orElse(new User(-1, "Default"));
+System.out.println("UserId:" +" "+ user.getUserId() + " Username: " + user.getUsername());
+--------------------***-------------------------
+orElseGet();
+User user = optionalUser.orElseGet(()->new User(-1, "Default"));
+System.out.println("UserId:" +" "+ user.getUserId() + " Username: " + user.getUsername());
+--------------------***-------------------------
+orElseThrow();
+User user = optionalUser.orElseThrow();
+System.out.println("UserId:" +" "+ user.getUserId() + " Username: " + user.getUsername());
+--------------------***-------------------------
+
+########################################################################################################################################################################
+
+Java 8 Date & Time API
+
+old date classes were mutable. 
+new classes are immutable and thread-safe.
+-consists 4 below classes
+1. localDate
+2. LocalTime
+3. LocalDateTime
+4. ZonedDateTime
+
+Duration vs Period
+Duration represents a time-based amount (hours,minutes,Seconds)
+Period represents a date-based amount (years,months,days)
+
+Duration is compatible with LocalTime as well as LocalDateTime.
+period is only compatible with localDate
+
+ZonedDateTime
+It represents a Date and time along with a Time Zone
+It is used when you want to handle Date and time across diffrent time zones
+
+--------------------***-------------------------
+
+import java.time.LocalDate;
+
+LocalDate date = LocalDate.now();
+System.out.println(date);  // 2026-04-11
+--------------------***-------------------------
+
+import java.time.LocalTime;
+
+LocalTime time = LocalTime.now();
+System.out.println(time);  // 15:30:45
+--------------------***-------------------------
+
+import java.time.LocalDateTime;
+
+LocalDateTime dateTime = LocalDateTime.now();
+System.out.println(dateTime);  // 2026-04-11T15:30:45
+--------------------***-------------------------
+
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+
+ZonedDateTime indiaTime = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+System.out.println(indiaTime);
+--------------------***-------------------------
+
+import java.time.Duration;
+import java.time.LocalTime;
+
+LocalTime start = LocalTime.of(10, 0);
+LocalTime end = LocalTime.of(12, 30);
+
+Duration duration = Duration.between(start, end);
+System.out.println(duration.toHours());  // 2
+
+--------------------***-------------------------
+
+import java.time.Period;
+import java.time.LocalDate;
+
+LocalDate startDate = LocalDate.of(2020, 1, 1);
+LocalDate endDate = LocalDate.of(2023, 1, 1);
+
+Period period = Period.between(startDate, endDate);
+System.out.println(period.getYears());  // 3
+--------------------***-------------------------
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+LocalDateTime start = LocalDateTime.now();
+LocalDateTime end = start.plusHours(5);
+
+Duration duration = Duration.between(start, end);
+System.out.println(duration.toHours());  // 5
+--------------------***-------------------------
+
+import java.time.Period;
+import java.time.LocalDate;
+
+LocalDate today = LocalDate.now();
+LocalDate nextMonth = today.plusMonths(1);
+
+Period period = Period.between(today, nextMonth);
+System.out.println(period.getMonths());  // 1
+
+########################################################################################################################################################################
+
