@@ -685,3 +685,126 @@ System.out.println(period.getMonths());  // 1
 
 ########################################################################################################################################################################
 
+Stream API:
+
+
+1.It is an interface
+2.It has lot of methods
+3.It process Data
+4.Supports funtional style program
+
+
+1. stream() - present inside Collection Interface. It convert any collection into Stream, return type is Stream<E>
+
+2.collect() - Inside Stream interface which takes all the elements from the Stream and transform then into a final result, like a List, Set, or Map.
+
+Intermediate operations:
+They transform or process the data in a stream, but they do not actually produce a result on their own. EX - filter(), map(), sorted()
+
+Terminal operations:
+They triggered the execution of the stream and produces a final result. EX - collect(), forEach(), count().
+
+
+-Once a stream in consumed, it cannot be reused. Terminal Oprations end the stream completly.
+
+-Intermediate oprations are lazy loaded, where terminal operations are eager loaded.
+
+--------------------***-------------------------
+Ex-
+var numbers = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4, 5, 6));
+
+		numbers.stream().filter((num) -> {
+			System.out.println("Filter called");
+			if (num % 2 == 0) {
+				return true;
+			}
+			return false;
+		}).map((num) -> {
+			System.out.println("Map called");
+			return num * 2;
+		});   //output --nothing
+
+		//but when we call terminal method 
+
+			//above same code
+		.forEach(System.out::println);  //after add this line then above code also executed and output printed
+
+--------------------***-------------------------
+Strem methods:
+
+findFirst() -It is a terminal method that returns the first element of the stream - returns object in optional
+
+anyMatch() - It is terminal method that returns true if any element matches a given condition.  
+
+allMatch() - It is a terminal method that returns true if all elements match a given condition.
+
+noneMatch() - It is a terminal method that returns true if no elements match a given condition.
+
+sorted() - It is Intermediate method that returns a Stream with element sorted.
+numbers.stream().sorted().forEach(System.out::println);
+
+parallelStream() - 
+It allows the stream to process elements in parallel making the processing faster.
+
+
+
+--------------------***-------------------------
+
+Primitive Streams:
+-java provides special Streams for primitive Types
+
+1.int - IntStream
+2.long - LongStream
+3.double - DoubleStream
+
+IntStream of = IntStream.of(0,1,2,3);
+LongStream of2 = LongStream.of(0);
+DoubleStream of3 = DoubleStream.of(0);
+
+--------------------***-------------------------
+
+import java.util.stream.IntStream;
+public class IntStreamExample {
+    public static void main(String[] args) {
+        int sum = IntStream.rangeClosed(1, 10)   // 1 to 10
+                           .filter(n -> n % 2 == 0) // even numbers
+                           .sum();
+
+        System.out.println("Sum of even numbers: " + sum);
+    }
+}
+
+--------------------***-------------------------
+
+import java.util.stream.LongStream;
+public class LongStreamExample {
+    public static void main(String[] args) {
+        long factorial = LongStream.rangeClosed(1, 5)
+                                   .reduce(1, (a, b) -> a * b);
+
+        System.out.println("Factorial: " + factorial);
+    }
+}
+
+--------------------***-------------------------
+
+import java.util.stream.DoubleStream;
+public class DoubleStreamExample {
+    public static void main(String[] args) {
+        double avg = DoubleStream.of(10.5, 20.3, 30.2, 40.0)
+                                 .average()
+                                 .orElse(0.0);
+
+        System.out.println("Average: " + avg);
+    }
+}
+
+--------------------***-------------------------
+
+
+
+ 
+
+
+
+		
