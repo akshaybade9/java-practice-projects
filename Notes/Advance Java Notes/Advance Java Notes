@@ -1,5 +1,5 @@
 Notes:
-Total 51 - Done 6 - Remaining - 45
+Total 57 - Done 16 - Remaining - 41
 
 ########################################################################################################################################################################
 
@@ -75,7 +75,7 @@ Difference Between Spring vs SpringBoot
 
 Spring boot:
 
--Provides auto configuration.  Ex - database configuration, tomcate configuration, dispatcher servlet configuration.
+-Provides auto configuration.  Ex - database configuration, tomcat configuration, dispatcher servlet configuration.
 -It has embeded tomcat server.
 -It provide support for in-memory database such as H2.
 -It manage dependancy version for you.
@@ -95,6 +95,245 @@ Consist Combination of below 3 annotations
 
 ########################################################################################################################################################################
 
+Spring Actuator:
+
+-It is used for monitoring application.
+-It exposes certain production ready endpoints to monitor the application.
+-Actuator can be added to the classpath as a dependancy.
+
+management.endpoint.health.show-details=always
+management.endpoints.web.exposure.include=*
+
+It Having max 14 endpoints.
+
+Ex:
+
+-/actuator/metrics
+-/actuator/health
+-actuator/beans
+
+########################################################################################################################################################################
+
+Global Exception Handler:
+
+-No need to handle in every method by catch block , even if exception get then it comes to global Handler
+-If catch block present then precedence goes to catch block
+-GlobalExceptionHandler only execute when it not handle in particular method by catch block
+
+------------------------**------------------------
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+	
+	@ExceptionHandler(PlatformException.class)
+	public ResponseEntity<ErrorResponse> handlePlatformException(PlatformException ex, HttpServletRequest request) {
+
+		ErrorResponse error = new ErrorResponse(false, ex.getErrorCode(), ex.getMessage(), request.getRequestURI(),
+				UUID.randomUUID().toString(), Instant.now());
+
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
+
+		ErrorResponse error = new ErrorResponse(false, "FINFLOW-500", "Internal server error", request.getRequestURI(),
+				UUID.randomUUID().toString(), Instant.now());
+
+		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+}
+
+------------------------**------------------------
+
+########################################################################################################################################################################
+
+Lombok:
+
+-Lombok is used to remove boiler plate code by automatically generating common methods at the time of compilation
+-Common methods such as getters, setters, constructors, toString(), equals(), hashCode() and more.
+-It can be added to your project as a dependancy.
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getters 
+@Setters
+@EqualsAndHashCode
+@ToString
+@RequiredArgsConstructor - It is used for required fields , fields like final and @NonNull
+-@Data - Consist  - @Getters | @Setters | @RequiredArgsConstructor | @ToString | @EqualsAndHashCode
+
+########################################################################################################################################################################
+
+Bean Scopes:
+
+1.Singleton
+2.Prototype
+3.Request
+4.Session
 
 
+1.Singleton:
+-Single bean created at the time of application startup and share accross the entire spring container.
+-It is eager loading - because it create bean immediately while application start
 
+------------------------**------------------------
+
+@Component
+public class Employee {
+
+	public Employee() {
+		System.out.println("Employee Bean Created");
+	}
+
+}
+
+
+@RestController
+public class Controller {
+
+  public Controller() {
+		System.out.println("Controller Bean Created");
+	}
+
+	@Autowired
+	Employee employee1;
+
+	@Autowired
+	Employee employee2;
+
+	@Autowired
+	Employee employee3;
+
+	@GetMapping("/getStudent1")
+	public int getEmployee1() {
+		return employee1.hashCode();
+	}
+
+	@GetMapping("/getStudent2")
+	public int getEmployee2() {
+		return employee2.hashCode();
+	}
+
+	@GetMapping("/getStudent3")
+	public int getEmployee3() {
+		return employee3.hashCode();
+	}
+
+}
+
+//output: only one bean created and every API return same hashcode due to single bean
+Console Print while application run:
+Controller Bean Created
+Employee Bean Created
+
+------------------------**------------------------
+
+
+2.Prototype:
+A new instance is created each time the bean is requested.
+-It is lazy loading - because it create bean only when request
+
+------------------------**------------------------
+
+@Component
+@Scope("prototype")
+public class Employee {
+
+	public Employee() {
+		System.out.println("Employee Bean Created");
+	}
+
+}
+
+
+@RestController
+public class Controller {
+	
+	public Controller() {
+		System.out.println("Controller Bean Created");
+	}
+
+	@Autowired
+	Employee employee1;
+
+	@Autowired
+	Employee employee2;
+
+	@Autowired
+	Employee employee3;
+
+}
+
+
+Console Print while application run:
+Controller Bean Created
+Employee Bean Created
+Employee Bean Created
+Employee Bean Created
+No console print on every api hit after hit from postman
+
+------------------------**------------------------
+
+
+@Component
+@Scope("prototype")
+public class Employee {
+
+	public Employee() {
+		System.out.println("Employee Bean Created");
+	}
+
+}
+
+
+@RestController
+@Scope("prototype")
+public class Controller {
+	
+	public Controller() {
+		System.out.println("Controller Bean Created");
+	}
+
+	@Autowired
+	Employee employee1;
+
+	@Autowired
+	Employee employee2;
+
+	@Autowired
+	Employee employee3;
+
+  @GetMapping("/getStudent1")
+	public int getEmployee1() {
+		return employee1.hashCode();
+	}
+
+	@GetMapping("/getStudent2")
+	public int getEmployee2() {
+		return employee2.hashCode();
+	}
+
+	@GetMapping("/getStudent3")
+	public int getEmployee3() {
+		return employee3.hashCode();
+	}
+
+}
+
+
+Console Not Print while application run:
+But it print when request hit from Postman when controller hit by API then beans created
+Console: On every hit it repeat create below output
+Controller Bean Created
+Employee Bean Created
+Employee Bean Created
+Employee Bean Created
+
+------------------------**------------------------
+
+Summary: Prototype
+-If we Autowired prototype beans in singleton class then prototype beans acts as singleton it create while application run, not create in every hit
+-If we Autowired prototype beans in prototype class then it not create on application run but it create beans every time when we hit or call that class
+-If we Autowired singleton beans in prototype class then singleton bean create on application run but prototype class bean create every time when we call.
