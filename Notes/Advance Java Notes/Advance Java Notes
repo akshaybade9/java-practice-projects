@@ -1,0 +1,100 @@
+Notes:
+Total 51 - Done 6 - Remaining - 45
+
+########################################################################################################################################################################
+
+IOC:
+
+Inversion of Control means that spring can create objects in the form of beans.
+There is no need to manually create object using new keyword
+It creates bean in IOC container
+This beans can be injected into a field of a class using @Autowire annotation.
+
+Pre Condition is
+-we need to tell java that i need to create the object of the respective class 
+-For this we use annotations like @RestController | @Component | @Service
+
+
+########################################################################################################################################################################
+
+Diff Between @RestController vs @Controller
+
+
+@RestController
+-It returns data directly in response body.
+-No need of ViewResolver.
+-It is combination of @Controller & @ResponseBody
+
+@Controller
+-It return view name.
+-It uses a viewResolver to resolve a template (eg Html or Jsp) from view name.
+-Need explicitly use @ResponseBody to bypass ViewResolver and send data directly. (It has only @Controller if we want to return data we need to exaplicitly need to add @responsebody annotation) 
+
+ViewResolver is an interface that maps view names return by controllers to actual view files
+
+
+########################################################################################################################################################################
+
+@RestController   --    @Component | @Controller | @ResponseBody
+
+@Service          --    @Component ---same as component replacable with it
+
+@Repository.      --    @Component - Additional feuture is it converts check persistence exceptions into uncheck DataAccessException
+
+@Component.       --    @Component
+
+
+------------------------**------------------------
+
+@Service
+Inside inteface present below alias
+
+@Component
+public interface Servie{
+
+  @AliasFor(
+      annotation=Component.class
+    )
+  String value() default "";
+
+  }
+
+------------------------**------------------------
+
+########################################################################################################################################################################
+
+Spring boot and its starter dependancies
+
+-Helpful in dependancy management in pom.xml
+-Multiple dependancies are clusture into one starter dependancy
+-All dependancies inside starter dependancy are compatible with each other 
+
+########################################################################################################################################################################
+
+Difference Between Spring vs SpringBoot
+
+Spring boot:
+
+-Provides auto configuration.  Ex - database configuration, tomcate configuration, dispatcher servlet configuration.
+-It has embeded tomcat server.
+-It provide support for in-memory database such as H2.
+-It manage dependancy version for you.
+
+
+-All the code and beans already written in jars by java we just need to add the dependancy of releative jar if we add that dependancies java automatic configure and create beans which are difine in that class on the basis of conditional annotation which are present in that class ,all the auto configure classes have @AutoConfiguration annotation present which execute as per conditions
+
+
+########################################################################################################################################################################
+
+@SpringBootApplication annotation
+
+Consist Combination of below 3 annotations
+1.@SpringBootConfiguration - when put on a class makes that class a source for a bean declarations.
+2.@EnableAutoConfiguration - enable auto configuration
+3.@ComponentScan - scans your project, looks out for declared beans and actually create those beans in IOC container.
+
+########################################################################################################################################################################
+
+
+
+
