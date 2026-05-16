@@ -1,5 +1,5 @@
 Notes:
-Total 57 - Done 16 - Remaining - 41
+Total 57 - Done 29 - Remaining - 28
 
 ########################################################################################################################################################################
 
@@ -337,3 +337,542 @@ Summary: Prototype
 -If we Autowired prototype beans in singleton class then prototype beans acts as singleton it create while application run, not create in every hit
 -If we Autowired prototype beans in prototype class then it not create on application run but it create beans every time when we hit or call that class
 -If we Autowired singleton beans in prototype class then singleton bean create on application run but prototype class bean create every time when we call.
+
+------------------------**------------------------
+
+Request: A new instance is created for each HTTP request.
+Session: A new instance is created for each HTTP session. One session have multiple http requests.
+
+When a bean depends on another bean with a scope that prevents immediate instantiation, a proxy is created to allow the dependent bean to be initialize without delay 
+
+@RestController
+public class Controller {
+	
+	public Controller() {
+		System.out.println("Controller Bean Created");
+	}
+
+	@Autowired
+	Employee employee1;
+	
+	}
+
+
+@Component
+@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class Employee {
+
+
+}
+
+########################################################################################################################################################################
+
+Spring profiles:
+
+@Profile: Class Level annotation
+It is used to active beans only for specific environments based on the active profile
+
+@Component
+@Profile("dev", "prod")
+public class Employee {
+
+}
+
+
+We set in two ways:
+1.From internal .properties files
+2.From external .properties files
+Precedence goes to External 1st if both present and it ignore internal file
+
+It allows to different configurations for different environment
+
+------------------------**------------------------
+
+application.properties
+
+server.port=8070
+#spring.profiles.active=dev
+spring.profiles.active=prod,dev.       multiple profile activation ..highest priority to right ...priority increase from right to left.....1 priority execute always 
+------------------------**------------------------
+
+application-dev.properties
+
+server.port=8060
+#spring.profiles.active=prod
+
+------------------------**------------------------
+
+application-prod.properties
+
+server.port=8050
+
+------------------------**------------------------
+
+########################################################################################################################################################################
+
+20. application.properties vs yaml.properties
+
+yaml:
+- Supports hierarchical structure
+- We can configure multiple environments in single yaml file seprating by --- 3 dot lines
+
+########################################################################################################################################################################
+
+@Value | @ConfigurationProperties | env.getProperty()
+
+------------------------**------------------------
+//1st way to read properties from properties file to any class
+
+2fa.enable=true
+
+@Value("${2fa.enable}")
+private Boolean faenable;
+
+------------------------**------------------------
+//2nd way
+
+@ConfigurationProperties(prefix = "2fa")
+@Component
+public class Config {
+
+private Boolean faenable;
+
+}
+
+------------------------**------------------------
+//3rd way
+
+@Autowired
+private Environment env;
+
+env.getProperty("2fa.enable",Boolean.class);
+
+------------------------**------------------------
+
+########################################################################################################################################################################
+
+Spring data JPA vs JPA vs Hibernate vs JDBC
+
+ 1.JDBC
+JDBC need mapper to map fields with DB fields
+we use actual sql query in code with same names which present in DB not in entity
+It does not read @table @column due to it annotations consist in jpa package and jdbc not present or not accesible to that package
+It not give data or map directly to our java entity , we need to set explicitly from resultset to entity because it return data in resultset.
+It not Supports transaction management.
+
+2.Hibernate
+It is an ORM tool
+ORM- Object Relational Mapping allows to map java object fields directly to DB columns
+Hibernate is a implementation of JPA
+The @Entity, @Table, @column annotation is from package jpa-jakarta.persistence and this annotations use by hibernate means hibernate is implementation of jpa
+Hibernate code written/implement in jpa package
+hibernate dependancy is present inside the jpa dependancy
+we use hql queries like String query="from emloyeee where id=:id";
+we use sessionfactory.openSession();   ||     query.setParameter();
+we follow java entity field names in query
+so why we need to modify and upgrade to jpa or spring data jpa:
+reason: there are multiple orm tools like EclipseLink, MyBatis and they have different implementations so if we need to switch from one tool to another it is difficult
+
+3.JPA
+It is one step above to hibernate and other ORM tools. It defines a standard set of methods that are to be implemented by this ORM tools.
+Spring boot consider the hibernate is default implementation of JPA.
+hibernate implement JPA. and if we want to change from one ORM to another then just need to change implement.
+EntityManager is an interface that can be consider as JPA.
+
+4.Spring data JPA.   --JPARepository inteface
+It is built on top of JPA. 
+It is a module i.e it's a Spring boot project which has introduce even more boilerplate.
+It remove bolier plate code that we need to write everty time.
+EX:(Derived Queries) - Employee finByIdAndNameAndDepartment(Long id, String name, String department);
+
+########################################################################################################################################################################
+
+@Transactional
+propogations:behavior of transactional when it is call in inside of existing transactional
+
+                                      Caller have active transaction?
+																			|                                       |
+																			|                                       |
+																		  |                                       |
+																		If YES                                   If NO
+
+1. REQUIRED:                      Join transaction.                        Start new one
+2.REQUIRED_NEW                    Suspend, create new transaction.         Start new one
+3.SUPPORTS                        Join existing.                           Run without transaction
+4.NOT_SUPPORTED                   Suspend, No transaction create.          Run without transaction
+5.MANDATORY                       Join existing                            throw exception
+6.NEVER                           throws error                             Run without transaction
+
+########################################################################################################################################################################
+
+@Qualifier.  |        @Primary
+
+@Qualifier:
+It is introduced to resolve ambiguity when multiple beans of the same type exists.
+
+------------------------**------------------------
+
+interface Vehicle{
+
+}
+
+@Component
+class Twowheeler implements Vehichle{
+
+}
+
+@Component
+class Fourwheeler implements Vehichle{
+
+}
+
+class Controller{
+
+	@Autowired
+	@Qualifier("fourWheeler")
+	Vehichle v;
+
+	//we get error unless until we not added @Qualifier
+
+}
+
+------------------------**------------------------
+
+interface Vehicle{
+
+}
+
+@Component("bean2")
+class Twowheeler implements Vehichle{
+
+}
+
+@Component("bean1")
+@Primary
+class Fourwheeler implements Vehichle{
+
+}
+
+class Controller{
+
+	@Autowired
+	Vehichle v;
+
+	//it not give error due to @primary if we remove then it get error even though we name as bean1 and bean2 because while injecting we need to specify which bean you want to inject this issue get only when injecting .
+}
+
+------------------------**------------------------
+
+@configuration
+class BeanCreator{
+
+	@Bean("employee1")
+	public Employee getemp1(){
+		return new Employee();
+	}
+
+	@Bean("employee2")
+	public Employee getemp2(){
+		return new Employee();
+	}
+}
+
+class Controller{
+
+	@Autowired
+	//@Qualifier("employee1")
+	Employee v;
+
+	//we give error until we added it  @Qualifier
+
+}
+
+------------------------**------------------------
+
+########################################################################################################################################################################
+
+SPRING BEAN INJECTION TYPES
+===========================
+
+1) Constructor Injection
+------------------------
+- Dependency injected through constructor.
+- Best and most recommended approach.
+- Object can be immutable.
+- Dependency becomes mandatory.
+- @Autowired is optional if only one constructor exists.
+- required=false cannot be used directly here.
+
+Example:
+
+@Component
+class Engine {
+}
+
+@Component
+class Car {
+
+    private final Engine engine;
+
+    public Car(Engine engine) {
+        this.engine = engine;
+    }
+}
+
+
+2) Setter Injection
+-------------------
+- Dependency injected using setter method.
+- Object remains mutable.
+- Used for optional dependencies.
+- @Autowired is generally required.
+- required=false can be used here.
+
+Example:
+
+@Component
+class Car {
+
+    private Engine engine;
+
+    @Autowired(required = false)
+    public void setEngine(Engine engine) {
+        this.engine = engine;
+    }
+}
+
+
+3) Field Injection
+------------------
+- Dependency injected directly into field.
+- Easy but not recommended in production.
+- Object remains mutable.
+- @Autowired is required.
+- required=false can be used here.
+
+Example:
+
+@Component
+class Car {
+
+    @Autowired(required = false)
+    private Engine engine;
+}
+
+
+IMPORTANT POINTS
+================
+Constructor Injection
+- Immutable object possible
+- Mandatory dependency
+- Preferred in Spring Boot
+
+Setter Injection
+- Mutable object
+- Optional dependency possible
+
+Field Injection
+- Mutable object
+- Less testable
+- Avoid in production
+
+
+@Autowired Requirement
+======================
+Constructor Injection
+- Not mandatory if only one constructor
+
+Setter Injection
+- Mostly required
+
+Field Injection
+- Required
+
+########################################################################################################################################################################
+
+@LOOKUP ANNOTATION
+==================
+
+- Used to get a new bean instance every time.
+- Mainly used when a Singleton bean needs a Prototype bean.
+- Spring overrides the method at runtime and returns the bean.
+
+WHY USE @Lookup ?
+=================
+Singleton bean -> created once
+Prototype bean -> created every request
+
+Normally, Singleton gets only one Prototype object.
+@Lookup helps get a fresh Prototype object every time.
+
+
+Example
+=======
+
+@Component
+@Scope("prototype")
+class Engine {
+}
+
+@Component
+class Car {
+
+    @Lookup
+    public Engine getEngine() {
+        return null;
+    }
+}
+
+Usage:
+
+Engine e1 = car.getEngine();
+Engine e2 = car.getEngine();
+
+System.out.println(e1 == e2); // false
+
+
+IMPORTANT POINTS
+================
+- Mostly used with Prototype scope.
+- Method should not be final/static/private.
+- Spring generates implementation internally.
+- Avoid manual object creation using new keyword.
+- Useful for dynamic bean retrieval.
+
+########################################################################################################################################################################
+
+@LAZY ANNOTATION
+================
+
+- Bean is created only when needed.
+- Delays bean initialization.
+- Improves startup performance.
+
+Without @Lazy
+-------------
+Bean created during application startup.
+
+With @Lazy
+----------
+Bean created only when first used.
+
+
+Example
+=======
+
+@Component
+@Lazy
+class Engine {
+
+    public Engine() {
+        System.out.println("Engine Bean Created");
+    }
+}
+
+@Component
+class Car {
+
+    @Autowired
+    private Engine engine;
+}
+
+
+IMPORTANT POINTS
+================
+- Used for lazy initialization.
+- Can be applied on:
+  -> Class
+  -> @Bean method
+  -> Injection point
+- Useful when bean creation is costly.
+- Helps in circular dependency handling sometimes.
+
+
+CIRCULAR / CYCLIC DEPENDENCY
+============================
+
+- Happens when two beans depend on each other.
+
+Example:
+A depends on B
+B depends on A
+
+This creates a cycle.
+
+
+Example
+=======
+
+@Component
+class A {
+
+    @Autowired
+    private B b;
+}
+
+@Component
+class B {
+
+    @Autowired
+    private A a;
+}
+
+
+RESULT
+======
+- Spring may throw:
+  BeanCurrentlyInCreationException
+
+
+HOW TO RESOLVE
+==============
+
+1) Use @Lazy
+------------
+
+@Component
+class A {
+
+    @Autowired
+    @Lazy
+    private B b;
+}
+
+2) Use Setter Injection
+-----------------------
+
+@Component
+class A {
+
+    private B b;
+
+    @Autowired
+    public void setB(B b) {
+        this.b = b;
+    }
+}
+
+3) Redesign Application
+-----------------------
+- Best solution.
+- Remove tight coupling between classes.
+
+
+IMPORTANT POINTS
+================
+- Constructor Injection + Circular Dependency
+  -> Not supported directly by Spring.
+
+- Field/Setter Injection
+  -> Can work using @Lazy.
+
+- Circular dependency is considered bad design.
+
+########################################################################################################################################################################
+
+Interceptor vs Filters:
+
+
+
+
+
