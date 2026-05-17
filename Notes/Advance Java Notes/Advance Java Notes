@@ -1,5 +1,5 @@
 Notes:
-Total 57 - Done 29 - Remaining - 28
+Total 57 - Done 40 - Remaining - 17         
 
 ########################################################################################################################################################################
 
@@ -872,7 +872,1110 @@ IMPORTANT POINTS
 
 Interceptor vs Filters:
 
+FILTER vs INTERCEPTOR
+=====================
+
+FILTER
+======
+- Part of Servlet API.
+- Works before request reaches DispatcherServlet.
+- Used for:
+  -> Authentication
+  -> Logging
+  -> CORS
+  -> Request/Response modification
+
+INTERCEPTOR
+===========
+- Part of Spring MVC.
+- Works after DispatcherServlet and before Controller.
+- Used for:
+  -> Authentication
+  -> Authorization
+  -> Logging
+  -> Handler processing
 
 
+FILTER FLOW
+============
+Client
+  ->
+Filter
+  ->
+DispatcherServlet
+  ->
+Controller
 
 
+INTERCEPTOR FLOW
+================
+Client
+  ->
+DispatcherServlet
+  ->
+Interceptor
+  ->
+Controller
+
+
+FILTER METHODS
+==============
+
+1) init()
+---------
+- Called once when filter created.
+
+2) doFilter()
+-------------
+- Main filtering logic.
+- Executes for every request.
+
+3) destroy()
+------------
+- Called when filter destroyed.
+
+
+FILTER EXAMPLE
+==============
+
+@Component
+public class MyFilter implements Filter {
+
+    @Override
+    public void doFilter(ServletRequest request,
+                         ServletResponse response,
+                         FilterChain chain)
+                         throws IOException, ServletException {
+
+        System.out.println("Before Request");
+
+        chain.doFilter(request, response);
+
+        System.out.println("After Response");
+    }
+}
+
+
+INTERCEPTOR METHODS
+===================
+
+1) preHandle()
+--------------
+- Executes before Controller method.
+- Return true -> continue request.
+- Return false -> stop request.
+
+2) postHandle()
+---------------
+- Executes after Controller method.
+- Executes before response sent to client.
+
+3) afterCompletion()
+--------------------
+- Executes after complete request and response.
+
+
+INTERCEPTOR FLOW
+================
+
+preHandle()
+    ->
+Controller
+    ->
+postHandle()
+    ->
+afterCompletion()
+
+
+INTERCEPTOR EXAMPLE
+===================
+
+@Component
+public class MyInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response,
+                             Object handler) {
+
+        System.out.println("Before Controller");
+
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request,
+                           HttpServletResponse response,
+                           Object handler,
+                           ModelAndView modelAndView) {
+
+        System.out.println("After Controller");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request,
+                                 HttpServletResponse response,
+                                 Object handler,
+                                 Exception ex) {
+
+        System.out.println("Request Completed");
+    }
+}
+
+
+MAIN DIFFERENCE
+===============
+
+FILTER
+------
+- Servlet level
+- Works before DispatcherServlet
+- Can modify request/response
+
+INTERCEPTOR
+-----------
+- Spring MVC level
+- Works before Controller
+- Cannot easily modify request/response
+
+
+WHEN TO USE
+===========
+
+Use Filter
+-----------
+- JWT validation
+- CORS
+- Compression
+- Encoding
+
+Use Interceptor
+---------------
+- Logging
+- Authentication
+- Authorization
+- Execution timing
+
+########################################################################################################################################################################
+
+@RequestParam | @PathVariable
+
+@PathVariable: It is used for identifiers that unquely locate a resource.
+@RequestParam: It is used for optional parameters, filters and pegination logic.
+
+
+------------------------**------------------------
+
+@GetMapping("/get/{id}")             // localhost:8080/get/1
+public Employee getEmployee(@PathVariable Long id){
+
+}
+
+------------------------**------------------------
+
+@GetMapping("/get")             // localhost:8080/get             department=null
+public Employee getEmployee(@RequestParam(required=false) String department){
+					if(department==null) repo.findAll();
+}
+
+------------------------**------------------------
+
+########################################################################################################################################################################
+
+ResponseEntity:
+It is a spring class that represents the entire HTTP response i.e it's body, status code & response headers if any.
+-Send various HTTP status codes
+-Add response headers in API 
+-ResponseEntity<Void> if method return type we want to set as void ---retrun ResponseEntity.noContent.build();
+
+########################################################################################################################################################################
+
+DispatcherServlet:
+
+DISPATCHER SERVLET INTERNAL FLOW
+================================
+
+SERVER STARTUP
+==============
+1) DispatcherServlet object created.
+
+2) init() method called.
+
+3) Spring initializes important components.
+
+
+INITIALIZATION FLOW
+===================
+
+1) MultipartResolver
+--------------------
+Purpose:
+- Handles file upload requests.
+
+Example:
+- MultipartFile handling.
+
+Checks:
+--------
+Is request multipart/form-data ?
+
+If YES:
+-> Converts request into MultipartHttpServletRequest
+
+
+2) LocaleResolver
+-----------------
+Purpose:
+- Resolves language/internationalization.
+
+Example:
+- English
+- Hindi
+
+Uses:
+-----
+Accept-Language header
+OR session/cookie locale.
+
+
+3) ThemeResolver
+----------------
+Purpose:
+- Resolves application theme.
+
+Example:
+- Dark Theme
+- Light Theme
+
+
+4) HandlerMapping
+-----------------
+Purpose:
+- Finds which Controller handles request.
+
+Example:
+--------
+/login -> LoginController
+
+
+5) HandlerAdapter
+-----------------
+Purpose:
+- Executes matched controller method.
+
+Why Needed ?
+-------------
+Different controller types handled uniformly.
+
+
+6) HandlerExceptionResolver
+---------------------------
+Purpose:
+- Handles exceptions globally.
+
+Example:
+--------
+ArithmeticException
+CustomException
+
+Converts exception into proper response.
+
+
+7) RequestToViewNameTranslator
+------------------------------
+Purpose:
+- Generates default view name if controller
+  does not return view explicitly.
+
+Example:
+--------
+URL:
+ /home
+
+Default View:
+ home.jsp
+
+
+8) ViewResolver
+---------------
+Purpose:
+- Converts logical view name into actual page.
+
+Example:
+--------
+"home"
+ ->
+/WEB-INF/views/home.jsp
+
+
+9) FlashMapManager
+------------------
+Purpose:
+- Stores temporary attributes during redirect.
+
+Mostly used in:
+---------------
+RedirectAttributes
+
+Example:
+--------
+redirect:/login
+
+
+COMPLETE REQUEST FLOW
+=====================
+
+Client Request
+    ->
+DispatcherServlet
+
+    ->
+1) Check MultipartResolver
+    ->
+File Upload Processing
+
+    ->
+2) LocaleResolver
+    ->
+Language Resolution
+
+    ->
+3) ThemeResolver
+    ->
+Theme Resolution
+
+    ->
+4) HandlerMapping
+    ->
+Find Controller
+
+    ->
+5) HandlerAdapter
+    ->
+Execute Controller Method
+
+    ->
+Controller
+    ->
+Service
+    ->
+Repository
+    ->
+Database
+
+Response Back
+==============
+
+Database
+   ->
+Repository
+   ->
+Service
+   ->
+Controller returns View Name/JSON
+
+   ->
+6) HandlerExceptionResolver
+   ->
+Check Exceptions
+
+   ->
+7) RequestToViewNameTranslator
+   ->
+Generate Default View Name (if needed)
+
+   ->
+8) ViewResolver
+   ->
+Find Actual View Page
+
+   ->
+9) FlashMapManager
+   ->
+Handle Redirect Attributes
+
+   ->
+DispatcherServlet
+   ->
+Client Response
+
+
+IMPORTANT POINTS
+================
+MultipartResolver
+-> File upload support
+
+LocaleResolver
+-> Internationalization
+
+ThemeResolver
+-> UI themes
+
+HandlerMapping
+-> Finds controller
+
+HandlerAdapter
+-> Executes controller
+
+HandlerExceptionResolver
+-> Handles exceptions
+
+RequestToViewNameTranslator
+-> Generates default view name
+
+ViewResolver
+-> Finds actual JSP/HTML page
+
+FlashMapManager
+-> Stores redirect attributes temporarily
+
+
+########################################################################################################################################################################
+
+PAGINATION, SORTING & FILTERING
+===============================
+
+1) PAGINATION
+==============
+- Used to fetch data page by page.
+- Improves performance.
+- Avoids loading huge records at once.
+
+Example:
+--------
+Page 1 -> First 10 records
+Page 2 -> Next 10 records
+
+
+SPRING DATA JPA PAGINATION
+==========================
+
+Interfaces Used
+---------------
+- Pageable
+- Page
+
+
+Example
+=======
+
+@GetMapping("/users")
+public Page<User> getUsers(Pageable pageable) {
+
+    return userRepository.findAll(pageable);
+}
+
+
+URL Example
+===========
+
+/users?page=0&size=5
+
+Meaning:
+--------
+page=0  -> First page
+size=5  -> 5 records per page
+
+
+PAGE METHODS
+============
+
+page.getContent()
+-----------------
+Returns records list.
+
+page.getTotalElements()
+-----------------------
+Returns total records count.
+
+page.getTotalPages()
+-------------------
+Returns total pages count.
+
+page.getNumber()
+----------------
+Current page number.
+
+
+2) SORTING
+==========
+- Used to arrange records.
+- Ascending or Descending order.
+
+Types:
+------
+ASC  -> Ascending
+DESC -> Descending
+
+
+SORT EXAMPLE
+============
+
+@GetMapping("/users")
+public List<User> getUsers() {
+
+    return userRepository.findAll(
+        Sort.by(Sort.Direction.ASC, "name")
+    );
+}
+
+
+DESC EXAMPLE
+============
+
+Sort.by(Sort.Direction.DESC, "salary")
+
+
+PAGINATION + SORTING
+====================
+
+@GetMapping("/users")
+public Page<User> getUsers() {
+
+    Pageable pageable =
+        PageRequest.of(
+            0,
+            5,
+            Sort.by("name").ascending()
+        );
+
+    return userRepository.findAll(pageable);
+}
+
+
+3) FILTERING
+============
+- Used to fetch records based on condition.
+
+Example:
+--------
+Get users by city
+Get employees by salary
+Get account by status
+
+
+FILTERING EXAMPLE
+=================
+
+public interface UserRepository
+        extends JpaRepository<User, Long> {
+
+    List<User> findByCity(String city);
+}
+
+
+Usage:
+------
+
+userRepository.findByCity("Pune");
+
+
+MULTIPLE FILTER EXAMPLE
+=======================
+
+List<User> findByCityAndStatus(
+        String city,
+        String status);
+
+
+CUSTOM QUERY FILTER
+===================
+
+@Query("SELECT u FROM User u WHERE u.salary > :salary")
+List<User> getUsers(double salary);
+
+
+IMPORTANT POINTS
+================
+
+PAGINATION
+----------
+- Reduces database load
+- Improves performance
+
+SORTING
+-------
+- Orders data ASC/DESC
+
+FILTERING
+---------
+- Fetches required records only
+
+COMMONLY USED CLASSES
+=====================
+
+Pageable
+--------
+Pagination interface
+
+PageRequest
+-----------
+Creates pageable object
+
+Sort
+----
+Sorting support
+
+Page
+----
+Stores paginated result
+
+########################################################################################################################################################################
+
+MAPSTRUCT
+==========
+
+- MapStruct is used for object mapping.
+- Converts Entity <-> DTO automatically.
+- Reduces boilerplate code.
+- Generates implementation at compile time.
+- Faster than reflection-based mapping.
+
+
+WHY USE MAPSTRUCT ?
+===================
+Without MapStruct:
+------------------
+Manual setter/getter mapping required.
+
+With MapStruct:
+---------------
+Automatic mapping using interface.
+
+
+DEPENDENCY
+==========
+
+<dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct</artifactId>
+    <version>1.5.5.Final</version>
+</dependency>
+
+<dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct-processor</artifactId>
+    <version>1.5.5.Final</version>
+    <scope>provided</scope>
+</dependency>
+
+
+ENTITY
+======
+
+public class User {
+
+    private Long id;
+    private String name;
+    private String city;
+}
+
+
+DTO
+===
+
+public class UserDTO {
+
+    private Long id;
+    private String name;
+    private String city;
+}
+
+
+MAPPER
+======
+
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+
+    UserDTO toDto(User user);
+
+    User toEntity(UserDTO dto);
+}
+
+
+USAGE
+=====
+
+@Autowired
+private UserMapper mapper;
+
+UserDTO dto = mapper.toDto(user);
+
+
+@Generated implementation created automatically.
+
+
+@MAPPING ANNOTATION
+===================
+
+- Used when field names are different.
+
+Example
+=======
+
+public class User {
+
+    private String fullName;
+}
+
+public class UserDTO {
+
+    private String name;
+}
+
+
+Mapper:
+-------
+
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+
+    @Mapping(source = "fullName",
+             target = "name")
+    UserDTO toDto(User user);
+}
+
+
+MULTIPLE MAPPINGS
+=================
+
+@Mappings({
+    @Mapping(source = "fullName", target = "name"),
+    @Mapping(source = "mobileNo", target = "phone")
+})
+
+
+IGNORE FIELD
+=============
+
+@Mapping(target = "password",
+         ignore = true)
+
+
+DATE FORMAT
+===========
+
+@Mapping(source = "dob",
+         target = "birthDate",
+         dateFormat = "dd-MM-yyyy")
+
+
+LIST MAPPING
+============
+
+List<UserDTO> toDtoList(List<User> users);
+
+
+NESTED OBJECT MAPPING
+=====================
+
+public class Address {
+    private String city;
+}
+
+public class User {
+    private Address address;
+}
+
+public class UserDTO {
+    private String city;
+}
+
+
+@Mapping(source = "address.city",
+         target = "city")
+
+
+UPDATE EXISTING OBJECT
+======================
+
+@Mapping(target = "id", ignore = true)
+void updateUser(@MappingTarget User user,
+                UserDTO dto);
+
+
+IMPORTANT ANNOTATIONS
+=====================
+
+@Mapper
+--------
+Creates mapper interface.
+
+@Mapping
+---------
+Maps individual fields.
+
+@Mappings
+----------
+Multiple field mappings.
+
+@MappingTarget
+---------------
+Updates existing object.
+
+@BeanMapping
+-------------
+Custom mapping configuration.
+
+
+IMPORTANT POINTS
+================
+- Compile-time code generation.
+- Better performance.
+- Reduces manual mapping code.
+- Supports List and Nested Mapping.
+- Commonly used in Spring Boot projects.
+
+########################################################################################################################################################################
+
+SPRING BOOT VALIDATION
+======================
+
+- Validation is used to validate request data.
+- Mostly used on DTO/Model classes.
+- Uses Jakarta Validation / Hibernate Validator.
+
+
+COMMON VALIDATION ANNOTATIONS
+=============================
+
+1) @NotNull
+------------
+- Value should not be null.
+
+@NotNull
+private String name;
+
+
+2) @NotEmpty
+-------------
+- Value should not be null and not empty.
+- Works for String, List, Set, Map.
+
+@NotEmpty
+private String name;
+
+
+3) @NotBlank
+-------------
+- String should not be null and not blank.
+- Ignores spaces.
+
+@NotBlank
+private String name;
+
+
+4) @Size
+---------
+- Defines min/max length.
+
+@Size(min = 3, max = 20)
+private String username;
+
+
+5) @Min
+--------
+- Minimum numeric value.
+
+@Min(18)
+private int age;
+
+
+6) @Max
+--------
+- Maximum numeric value.
+
+@Max(60)
+private int age;
+
+
+7) @Email
+----------
+- Valid email format.
+
+@Email
+private String email;
+
+
+8) @Pattern
+------------
+- Regex validation.
+
+@Pattern(regexp = "[A-Z]{5}[0-9]{4}[A-Z]{1}")
+private String panNo;
+
+
+9) @Past
+---------
+- Date should be past date.
+
+@Past
+private Date dob;
+
+
+10) @Future
+------------
+- Date should be future date.
+
+@Future
+private Date bookingDate;
+
+
+11) @Positive
+--------------
+- Value must be positive.
+
+@Positive
+private double salary;
+
+
+12) @Negative
+--------------
+- Value must be negative.
+
+@Negative
+private int loss;
+
+
+13) @Digits
+------------
+- Controls integer and decimal digits.
+
+@Digits(integer = 5, fraction = 2)
+private double amount;
+
+
+MODEL EXAMPLE
+==============
+
+public class UserDTO {
+
+    @NotBlank(message = "Name is required")
+    private String name;
+
+    @Email(message = "Invalid email")
+    private String email;
+
+    @Min(value = 18,
+         message = "Age must be above 18")
+    private int age;
+}
+
+
+CONTROLLER VALIDATION
+=====================
+
+@PostMapping("/save")
+public String saveUser(
+        @Valid @RequestBody UserDTO dto) {
+
+    return "Saved";
+}
+
+
+VALIDATION EXCEPTION
+====================
+
+MethodArgumentNotValidException
+
+Occurs when validation fails.
+
+
+BINDINGRESULT
+==============
+
+@PostMapping("/save")
+public String saveUser(
+        @Valid @RequestBody UserDTO dto,
+        BindingResult result) {
+
+    if(result.hasErrors()) {
+        return "Validation Failed";
+    }
+
+    return "Success";
+}
+
+
+CUSTOM VALIDATION ANNOTATION
+=============================
+
+STEP 1 -> CREATE ANNOTATION
+===========================
+
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = PanValidator.class)
+
+public @interface ValidPan {
+
+    String message()
+        default "Invalid PAN Number";
+
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload()
+        default {};
+}
+
+
+STEP 2 -> CREATE VALIDATOR CLASS
+================================
+
+public class PanValidator
+    implements ConstraintValidator<ValidPan,
+                                   String> {
+
+    @Override
+    public boolean isValid(String value,
+                           ConstraintValidatorContext context) {
+
+        return value != null &&
+               value.matches(
+               "[A-Z]{5}[0-9]{4}[A-Z]{1}");
+    }
+}
+
+
+STEP 3 -> USE CUSTOM ANNOTATION
+================================
+
+public class UserDTO {
+
+    @ValidPan
+    private String panNo;
+}
+
+
+IMPORTANT POINTS
+================
+@NotNull
+---------
+Allows empty value.
+
+@NotEmpty
+----------
+Does not allow null or empty.
+
+@NotBlank
+----------
+Does not allow null, empty or spaces.
+
+@Pattern
+---------
+Used for regex validation.
+
+@Valid
+-------
+Triggers validation.
+
+BindingResult
+--------------
+Stores validation errors.
+
+Custom Annotation
+-----------------
+Used for reusable business validations.
+
+########################################################################################################################################################################
